@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace PassiveSkillTreePlanter.UrlDecoders;
 
@@ -25,24 +26,30 @@ public class MaxRollUrlDecoder
         }
 
         var groupId = match.Groups["groupId"].Value;
-        var dataUrl = $"https://poeplanner.maxroll.gg/poeplanner-data/load/{groupId}";
+        var dataUrl = $"https://planners.maxroll.gg/profiles/load/poe/{groupId}";
         var dataString = await new HttpClient().GetStringAsync(dataUrl, cancellationToken);
-        var data = JsonConvert.DeserializeObject<MaxRollDataRoot>(dataString);
+        var data = JsonConvert.DeserializeObject<MaxrollOuterData>(dataString);
+        var innerData = JsonConvert.DeserializeObject<MaxRollDataRoot>(data.Data);
         MaxRollTreeCollection treeCollection;
         if (match.Groups["treeId"].Success)
         {
             var treeId = int.Parse(match.Groups["treeId"].ValueSpan);
-            treeCollection = data?.Embeds?.FirstOrDefault(x => x?.Id == treeId) ?? throw new Exception($"Embed with id {treeId} was not found in the downloaded data");
+            treeCollection = innerData?.Embeds?.FirstOrDefault(x => x?.Id == treeId) ?? throw new Exception($"Embed with id {treeId} was not found in the downloaded data");
         }
         else
         {
-            treeCollection = data?.PassiveTree ?? throw new Exception("Non-embedded passive tree was not found in the downloaded data");
+            treeCollection = innerData?.PassiveTree ?? throw new Exception("Non-embedded passive tree was not found in the downloaded data");
         }
 
         return new MaxRollFetchResult(url.Trim(), treeCollection);
     }
 }
 
+public class MaxrollOuterData
+{
+    [JsonProperty("data")]
+    public string Data { get; set; }
+}
 public record MaxRollFetchResult(string Url, MaxRollTreeCollection TreeCollection);
 
 public class MaxRollDataRoot
@@ -64,5 +71,5 @@ public class MaxRollTreeCollection
 public class MaxRollVariant
 {
     public string Name { get; set; }
-    public int[] History { get; set; }
+    public JToken[] History { get; set; }
 }
