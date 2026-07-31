@@ -621,6 +621,11 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
         var nodesToTake = targetNodeIds.Except(allocatedNodeIds).ToHashSet();
         while (panel.IsVisible)
         {
+            if (Input.IsKeyDown(Keys.RButton))
+            {
+                break;
+            }
+
             var nodeToRemove = wrongNodes.Select(arg => passivesById.GetValueOrDefault(arg)).FirstOrDefault(x => x is { IsAllocatedForPlan: true, CanDeallocate: true });
             if (nodeToRemove != null)
             {
@@ -638,7 +643,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
                         Input.SetCursorPos(windowRect + panel.RefundButton.GetClientRectCache.Center.ToVector2Num());
                     }
 
-                    await Task.Delay(250);
+                    await Task.Delay(100);
                     continue;
                 }
 
@@ -653,7 +658,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
                     Input.SetCursorPos(windowRect + nodeToRemove.GetClientRectCache.Center.ToVector2Num());
                 }
 
-                await Task.Delay(250);
+                await Task.Delay(100);
             }
             else if (panel.RefundButton.IsVisible)
             {
@@ -673,7 +678,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
                         Input.SetCursorPos(windowRect + nodeToTake.GetClientRectCache.Center.ToVector2Num());
                     }
 
-                    await Task.Delay(250);
+                    await Task.Delay(100);
                 }
                 else
                 {
