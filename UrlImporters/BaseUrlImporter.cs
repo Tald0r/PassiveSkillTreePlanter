@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using PassiveSkillTreePlanter.UrlDecoders;
+﻿using PassiveSkillTreePlanter.UrlDecoders;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,6 +6,7 @@ using System.Threading.Tasks;
 using ExileCore.Shared.Helpers;
 using SharpDX;
 using System;
+using Hexa.NET.ImGui;
 
 namespace PassiveSkillTreePlanter.UrlImporters;
 
@@ -94,7 +94,7 @@ public abstract class BaseUrlImporter
                 {
                     if (data[_selectedVariant].CanSelectProgress)
                     {
-                        ImGui.SliderInt("Progress", ref _selectedProgress, 0, data[_selectedVariant].Passives.Count, null, ImGuiSliderFlags.AlwaysClamp);
+                        ImGui.SliderInt("Progress", ref _selectedProgress, 0, data[_selectedVariant].Passives.Count, ImGuiSliderFlags.AlwaysClamp);
                     }
 
                     if (ImGui.Button("Import"))

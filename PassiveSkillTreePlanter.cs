@@ -13,7 +13,7 @@ using ExileCore.Shared;
 using ExileCore.Shared.AtlasHelper;
 using ExileCore.Shared.Enums;
 using ExileCore.Shared.Helpers;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using PassiveSkillTreePlanter.SkillTreeJson;
 using PassiveSkillTreePlanter.TreeGraph;
 using PassiveSkillTreePlanter.UrlDecoders;
@@ -192,7 +192,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
                 _pathingNodes = null;
             }
 
-            ImGui.EndMenu();
+            ImGui.End();
         }
     }
 
@@ -241,7 +241,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
             "Build Edit",
             "Settings",
         };
-        if (ImGui.BeginChild("LeftSettings", new Vector2(150, ImGui.GetContentRegionAvail().Y), ImGuiChildFlags.Border, ImGuiWindowFlags.None))
+        if (ImGui.BeginChild("LeftSettings", new Vector2(150, ImGui.GetContentRegionAvail().Y), ImGuiChildFlags.Borders, ImGuiWindowFlags.None))
             for (var i = 0; i < settingName.Length; i++)
                 if (ImGui.Selectable(settingName[i], _selectedSettingsTab == i))
                     _selectedSettingsTab = i;
@@ -250,7 +250,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
         ImGui.SameLine();
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
         var contentRegionArea = ImGui.GetContentRegionAvail();
-        if (ImGui.BeginChild("RightSettings", contentRegionArea, ImGuiChildFlags.Border, ImGuiWindowFlags.None))
+        if (ImGui.BeginChild("RightSettings", contentRegionArea, ImGuiChildFlags.Borders, ImGuiWindowFlags.None))
         {
             var trees = _selectedBuildData.Trees;
             switch (settingName[_selectedSettingsTab])
@@ -327,7 +327,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
                             ESkillTreeType.Atlas => MapIconsIndex.TangleAltar,
                         };
                         var rect = SpriteHelper.GetUV(iconsIndex);
-                        ImGui.Image(Graphics.GetTextureId("Icons.png"), new Vector2(ImGui.CalcTextSize("A").Y), rect.TopLeft.ToVector2Num(),
+                        ImGui.Image(new ImTextureRef { TexID = Graphics.GetTextureId("Icons.png") }, new Vector2(ImGui.CalcTextSize("A").Y), rect.TopLeft.ToVector2Num(),
                             rect.BottomRight.ToVector2Num());
                         ImGui.NextColumn();
                         ImGui.Text(trees[j].Tag);
@@ -341,9 +341,9 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
                     ImGui.Text("NOTES:");
 
                     // only way to wrap text with imgui.net without a limit on TextWrap function
-                    ImGuiNative.igPushTextWrapPos(0.0f);
+                    ImGui.PushTextWrapPos(0.0f);
                     ImGui.TextUnformatted(_selectedBuildData.Notes);
-                    ImGuiNative.igPopTextWrapPos();
+                    ImGui.PopTextWrapPos();
                     break;
                 case "Build Edit":
                     DrawBuildEdit(trees, contentRegionArea);
@@ -420,7 +420,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
         ImGui.Text("Export current build");
         ImGui.SameLine();
         var rectMyPlayer = SpriteHelper.GetUV(MapIconsIndex.MyPlayer);
-        if (ImGui.ImageButton("charBtn", Graphics.GetTextureId("Icons.png"), new Vector2(ImGui.CalcTextSize("A").Y),
+        if (ImGui.ImageButton("charBtn", new ImTextureRef { TexID = Graphics.GetTextureId("Icons.png") }, new Vector2(ImGui.CalcTextSize("A").Y),
                 rectMyPlayer.TopLeft.ToVector2Num(), rectMyPlayer.BottomRight.ToVector2Num()))
         {
             trees.Add(new TreeConfig.Tree
@@ -433,7 +433,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
 
         ImGui.SameLine();
         var rectTangle = SpriteHelper.GetUV(MapIconsIndex.TangleAltar);
-        if (ImGui.ImageButton("atlasBtn", Graphics.GetTextureId("Icons.png"), new Vector2(ImGui.CalcTextSize("A").Y),
+        if (ImGui.ImageButton("atlasBtn", new ImTextureRef { TexID = Graphics.GetTextureId("Icons.png") }, new Vector2(ImGui.CalcTextSize("A").Y),
                 rectTangle.TopLeft.ToVector2Num(), rectTangle.BottomRight.ToVector2Num()))
         {
             trees.Add(new TreeConfig.Tree
@@ -520,7 +520,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
             ESkillTreeType.Atlas => MapIconsIndex.TangleAltar,
         };
         var rect = SpriteHelper.GetUV(iconsIndex);
-        ImGui.Image(Graphics.GetTextureId("Icons.png"), new Vector2(ImGui.CalcTextSize("A").Y), rect.TopLeft.ToVector2Num(),
+        ImGui.Image(new ImTextureRef { TexID = Graphics.GetTextureId("Icons.png") }, new Vector2(ImGui.CalcTextSize("A").Y), rect.TopLeft.ToVector2Num(),
             rect.BottomRight.ToVector2Num());
         ImGui.NextColumn();
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
