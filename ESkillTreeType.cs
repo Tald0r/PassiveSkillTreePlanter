@@ -1,8 +1,8 @@
-﻿namespace PassiveSkillTreePlanter;
+namespace PassiveSkillTreePlanter;
 
 public enum ESkillTreeType
 {
     Unknown,
     Character,
-    Atlas,
+    Atlas
 }
