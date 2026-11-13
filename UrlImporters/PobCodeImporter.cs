@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -21,13 +22,30 @@ public class PobCodeImporter : BaseUrlImporter
         var tree = root.ChildNodes.Cast<XmlNode>().First(x => x.Name == "Tree");
         var urls = tree.ChildNodes.Cast<XmlNode>()
             .Where(x => x.Name == "Spec")
-            .Select(spec => (name: spec.Attributes.GetNamedItem("title")?.Value,
-                url: spec.ChildNodes.Cast<XmlNode>().FirstOrDefault(specChild => specChild.Name == "URL")?.InnerText.Trim()))
-            .Where(x => x.url != null)
-            .Select(x => PathOfExileUrlDecoder.TryMatch(x.url, out var treeType, out var passives) ? new FetchedTree(passives.ToList(), x.name, "", treeType, false) : null)
+            .Select(ReadSpec)
             .Where(x => x != null)
             .ToList();
         return Task.FromResult(urls);
+    }
+
+    private static FetchedTree ReadSpec(XmlNode spec)
+    {
+        var url = spec["URL"]?.InnerText.Trim();
+        if (url == null || !PathOfExileUrlDecoder.TryMatch(url, out var type, out var passives, out var masteries))
+            return null;
+
+        var selections = spec.Attributes?["masteryEffects"]?.Value;
+        if (!string.IsNullOrEmpty(selections))
+        {
+            foreach (Match pair in Regex.Matches(selections, @"\{(\d+),(\d+)\}"))
+            {
+                if (ushort.TryParse(pair.Groups[1].ValueSpan, out var node) &&
+                    ushort.TryParse(pair.Groups[2].ValueSpan, out var effect) && passives.Contains(node))
+                    masteries[node] = effect;
+            }
+        }
+
+        return new FetchedTree(passives.ToList(), spec.Attributes?["title"]?.Value, "", type, false, masteries);
     }
 
     protected override bool IsValidUrl(string url)

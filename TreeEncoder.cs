@@ -7,13 +7,17 @@ namespace PassiveSkillTreePlanter;
 
 public class TreeEncoder
 {
-    public static (HashSet<ushort> Nodes, ESkillTreeType Type) DecodeUrl(string url)
+    public static (HashSet<ushort> Nodes, ESkillTreeType Type, Dictionary<ushort, ushort> MasteryEffects) DecodeUrl(string url)
     {
         try
         {
-            if (PoePlannerUrlDecoder.TryMatch(url, out var type, out var passiveIds) || PathOfExileUrlDecoder.TryMatch(url, out type, out passiveIds))
+            if (PoePlannerUrlDecoder.TryMatch(url, out var type, out var passiveIds))
             {
-                return (passiveIds, type);
+                return (passiveIds, type, new());
+            }
+            if (PathOfExileUrlDecoder.TryMatch(url, out type, out passiveIds, out var masteryEffects))
+            {
+                return (passiveIds, type, masteryEffects);
             }
         }
         catch (Exception ex)

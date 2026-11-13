@@ -40,6 +40,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
     private HashSet<ushort> _atlasUrlNodeIds = new();
 
     private HashSet<ushort> _characterUrlNodeIds = new();
+    private Dictionary<ushort, ushort> _characterMasteries = new();
     private SyncTask<bool> _currentTask;
     private bool _editorShown;
 
@@ -107,6 +108,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
         Settings.SelectedBuild = buildName;
         SelectedBuildData = TreeConfig.LoadBuild(SkillTreeUrlFilesDir, Settings.SelectedBuild) ?? new TreeConfig.SkillTreeData();
         _characterUrlNodeIds = new HashSet<ushort>();
+        _characterMasteries.Clear();
         SyncAtlasBuildDataIfSameFile();
     }
 
@@ -154,7 +156,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
     {
         if (string.IsNullOrWhiteSpace(url)) return;
         var cleanedUrl = RemoveAccName(url).Trim();
-        var (nodes, type) = TreeEncoder.DecodeUrl(cleanedUrl);
+        var (nodes, type, masteries) = TreeEncoder.DecodeUrl(cleanedUrl);
         if (nodes == null)
         {
             LogMessage($"PassiveSkillTree: Can't decode url {url}", 10);
@@ -164,6 +166,7 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
         if (type == ESkillTreeType.Character)
         {
             _characterUrlNodeIds = nodes;
+            _characterMasteries = masteries;
             Settings.LastSelectedCharacterUrl = url;
             ValidateNodes(_characterUrlNodeIds, _skillTreeData.SkillNodes);
         }
@@ -302,8 +305,8 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
                 _pathingNodes = null;
             }
 
-            ImGui.End();
         }
+        ImGui.End();
     }
 
     private static string CleanFileName(string fileName)
@@ -414,7 +417,51 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
         var allocatedNodeIds = allocatedNodeIdsFunc();
         DrawTreeOverlay(allocatedNodeIds, targetNodeIds, treeData, canvas.Scale, baseOffset);
         DrawTreeEditOverlay(treeData, canvas.Scale, baseOffset);
+        if (type == ESkillTreeType.Character && !_editorShown)
+            DrawMasteryHint(targetNodeIds, canvas.Scale, baseOffset);
         DrawControlPanel(type, treePanel, allocatedNodeIds, targetNodeIds);
+    }
+
+    private void DrawMasteryHint(IReadOnlySet<ushort> targetNodeIds, float scale, Vector2 offset)
+    {
+        if (ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow))
+            return;
+
+        var mouse = ImGui.GetMousePos();
+        SkillNode hovered = null;
+        float nearest = float.MaxValue;
+        foreach (var id in targetNodeIds)
+        {
+            if (!_skillTreeData.SkillNodes.TryGetValue(id, out var node) || !node.bMastery)
+                continue;
+
+            float radius = Math.Max(8f, node.DrawSize * scale * 0.5f);
+            float distance = Vector2.DistanceSquared(mouse, offset + node.DrawPosition * scale);
+            if (distance > radius * radius || distance >= nearest) continue;
+            hovered = node;
+            nearest = distance;
+        }
+        if (hovered == null) return;
+
+        ImGui.SetNextWindowPos(mouse - new Vector2(0f, 16f),
+            ImGuiCond.Always, new Vector2(0.5f, 1f));
+        const ImGuiWindowFlags flags = ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize
+            | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing;
+        if (ImGui.Begin("##pst_mastery_hint", flags))
+        {
+            ImGui.TextUnformatted($"Build choice: {hovered.Name}");
+            if (!_characterMasteries.TryGetValue(hovered.Id, out var effectId))
+                ImGui.TextDisabled("This tree does not specify a mastery effect.");
+            else if (hovered.MasteryEffects?.FirstOrDefault(effect => effect.Effect == effectId)?.Stats is { Count: > 0 } stats)
+            {
+                ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + 500f);
+                foreach (var stat in stats) ImGui.TextUnformatted(stat);
+                ImGui.PopTextWrapPos();
+            }
+            else
+                ImGui.TextDisabled($"Effect {effectId} is missing from the loaded tree data.");
+        }
+        ImGui.End();
     }
 
     private async SyncTask<bool> ChangeTree(IReadOnlySet<ushort> allocatedNodeIds, IReadOnlySet<ushort> targetNodeIds, TreePanel panel)

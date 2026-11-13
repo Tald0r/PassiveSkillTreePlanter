@@ -44,7 +44,7 @@ public class TreeConfig
         [JsonIgnore]
         public ESkillTreeType Type => _type ??= TreeEncoder.DecodeUrl(SkillTreeUrl) switch
         {
-            (not null, var type) => type,
+            (not null, var type, _) => type,
             _ => ESkillTreeType.Unknown
         };
 

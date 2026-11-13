@@ -46,6 +46,7 @@ public class PoESkillTreeJsonDecoder
                 OrbitIndex = nd.Value.OrbitIndex,
                 bJevel = nd.Value.IsJewelSocket,
                 bMastery = nd.Value.IsMastery,
+                MasteryEffects = nd.Value.MasteryEffects,
                 bMult = nd.Value.IsMultipleChoice,
                 linkedNodes = [..nd.Value.Out ?? [], .. nd.Value.In ?? []],
                 bKeyStone = nd.Value.IsKeystone,

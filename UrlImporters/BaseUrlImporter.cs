@@ -18,7 +18,8 @@ public abstract class BaseUrlImporter
     private Task<List<FetchedTree>> _dataFetchTask;
     private string _urlInput = "";
 
-    protected record FetchedTree(List<ushort> Passives, string Name, string Url, ESkillTreeType TreeType, bool CanSelectProgress);
+    protected record FetchedTree(List<ushort> Passives, string Name, string Url, ESkillTreeType TreeType, bool CanSelectProgress,
+        IReadOnlyDictionary<ushort, ushort> MasteryEffects = null);
 
     protected abstract Task<List<FetchedTree>> FetchTrees(string url, CancellationToken cancellationToken);
     protected abstract bool IsValidUrl(string url);
@@ -107,7 +108,8 @@ public abstract class BaseUrlImporter
                                 : $"{Name} import ({data[_selectedVariant].Url}), {_selectedProgress} pts",
                             SkillTreeUrl = PathOfExileUrlDecoder.Encode(
                                 data[_selectedVariant].Passives.Take(_selectedProgress).ToHashSet(),
-                                data[_selectedVariant].TreeType
+                                data[_selectedVariant].TreeType,
+                                data[_selectedVariant].MasteryEffects
                             )
                         };
 

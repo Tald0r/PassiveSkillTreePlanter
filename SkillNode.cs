@@ -15,6 +15,7 @@ public class SkillNode
     public bool bJevel;
     public bool bKeyStone;
     public bool bMastery;
+    public List<MasteryEffect> MasteryEffects;
     public bool bMult;
     public bool bNotable;
     public Vector2 DrawPosition;

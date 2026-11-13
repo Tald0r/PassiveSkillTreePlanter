@@ -90,6 +90,7 @@ public class Node
     public List<ushort> In { get; set; }
     public List<string> ReminderText { get; set; }
     public bool IsMastery { get; set; }
+    public List<MasteryEffect> MasteryEffects { get; set; }
     public long GrantedStrength { get; set; }
     public string AscendancyName { get; set; }
     public long GrantedDexterity { get; set; }
@@ -105,6 +106,12 @@ public class Node
     public bool IsMultipleChoiceOption { get; set; }
     public bool IsBlighted { get; set; }
     public int? ClassStartIndex { get; set; }
+}
+
+public class MasteryEffect
+{
+    public ushort Effect { get; set; }
+    public List<string> Stats { get; set; }
 }
 
 public class ExpansionJewel
