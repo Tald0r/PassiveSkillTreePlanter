@@ -412,8 +412,8 @@ public class PassiveSkillTreePlanter : BaseSettingsPlugin<PassiveSkillTreePlante
         var baseOffset = new Vector2(canvas.Center.X, canvas.Center.Y);
 
         var allocatedNodeIds = allocatedNodeIdsFunc();
-        DrawTreeOverlay(allocatedNodeIds, targetNodeIds, treeData, canvas.Scale, baseOffset);
-        DrawTreeEditOverlay(treeData, canvas.Scale, baseOffset);
+        DrawTreeOverlay(allocatedNodeIds, targetNodeIds, treeData, canvas.EffectiveScale, baseOffset);
+        DrawTreeEditOverlay(treeData, canvas.EffectiveScale, baseOffset);
         DrawControlPanel(type, treePanel, allocatedNodeIds, targetNodeIds);
     }
 
